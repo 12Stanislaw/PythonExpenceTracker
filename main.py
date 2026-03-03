@@ -2,7 +2,7 @@ import argparse
 import expense_tracker
 
 #List of allowed categories
-allowed_categories = ["grocery", "eating out", "fitness", "health"]
+allowed_categories = ["grocery", "eating out", "fitness", "health", "presents"]
 
 #---CREATING MAIN PARSER---
 parser = argparse.ArgumentParser("Expence tracker")
@@ -21,6 +21,8 @@ parser_add.add_argument("amount",
 parser_add.add_argument("category",
                          help = "Category of expense",
                          choices = allowed_categories)
+parser_add.add_argument("comment",
+                        help = "Comment for expence")
 
 #---DELETE EXPENSE---
 parser_delete = subparsers.add_parser("delete_expense")
@@ -36,7 +38,7 @@ if args.command == "load_data":
     expense_tracker.load_data()
 
 elif args.command == "add_expense":
-    expense_tracker.add_expense(args.amount, args.category)
+    expense_tracker.add_expense(args.amount, args.category, args.comment)
 
 elif args.command == "delete_expense":
     expense_tracker.delete_expense(args.expenseID)

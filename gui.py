@@ -1,0 +1,27 @@
+
+def write_loaded(data, total):
+    if not data:
+        print("Empty list")
+        return
+
+    headers = list(data[0].keys())
+    
+    # Виводимо шапку
+    header_line = " | ".join(headers)
+    print(header_line)
+    print("-" * len(header_line))
+
+    # 2. Виводимо рядки з форматуванням ціни
+    for row in data:
+        formatted_row = []
+        for key, value in row.items():
+            # Якщо це колонка з ціною — додаємо знак $
+            if key == "amount":
+                formatted_row.append(f"{value}$")
+            else:
+                formatted_row.append(str(value))
+
+        print(" | ".join(formatted_row))
+    
+    print("-" * len(header_line))
+    print(f"Total expenses: {total}$")
