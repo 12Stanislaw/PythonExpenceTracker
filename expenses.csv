@@ -1,5 +1,4 @@
-amount,category,comment
-50,fitness,gym membership
-25,eating out, dinner with gf
-25.0,presents,flowers
-30.0,grocery,apples
+ID,amount,category,comment
+1,50,fitness,gym membership
+2,25,eating out, dinner with gf
+4,30.0,grocery,apples
