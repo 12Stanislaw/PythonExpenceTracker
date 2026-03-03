@@ -1,8 +1,27 @@
 import csv
 import gui
 
+def set_id():
+    with open('expenses.csv', mode='r') as file:
+        reader = csv.DictReader(file)
+        fieldnames = reader.fieldnames
+        data = list(reader)
+ 
+    for i in range(len(data)):
+        data[i]["ID"] = i+1
+
+    with open("expenses.csv", 'w', encoding='utf-8', newline='') as f:
+        # Використовуємо DictWriter, щоб він розумів структуру словників
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()   # Записуємо заголовки (ID, Amount, Category тощо)
+        writer.writerows(data) # Записуємо всі змінені рядки
+    
+    
 
 def load_data():
+    
+    set_id()
+
     with open('expenses.csv', mode='r') as file:
         reader = csv.DictReader(file)
 
@@ -44,17 +63,18 @@ def add_expense(amount, category, comment):
         writer.writerow(new_row)
 
 def delete_expense(expenseID):
-    line_to_delete = expenseID  # Індекс рядка (починаючи з 0)
 
     # 1. Читаємо всі дані
     with open("expenses.csv", 'r') as f:
         rows = list(csv.reader(f))
 
     # 2. Видаляємо рядок
-    if 0 <= line_to_delete < len(rows):
-        del rows[line_to_delete]
+    if 0 <= expenseID < len(rows):
+        del rows[expenseID]
 
     # 3. Записуємо оновлені дані назад
     with open("expenses.csv", 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerows(rows)
+    
+    set_id()
