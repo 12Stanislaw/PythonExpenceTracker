@@ -25,3 +25,22 @@ def write_loaded(data, total):
     
     print("-" * len(header_line))
     print(f"Total expenses: {total}$")
+
+
+def accept_deleting(rows, expenceID):
+    row= rows[expenceID]
+    
+    print(f"ID       : {row['ID']}") 
+    print(f"Amount   : {row['amount']}")
+    print(f"Category : {row['category']}")
+    print(f"Comment  : {row['comment']}")
+
+    res = input("You sure [y/n]? ")
+
+    if res.lower() == 'y':
+        return True
+    elif res.lower() == 'n':
+        return False
+    else:
+        print("Wrong option")
+        return False

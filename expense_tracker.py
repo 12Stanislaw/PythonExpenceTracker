@@ -63,18 +63,26 @@ def add_expense(amount, category, comment):
         writer.writerow(new_row)
 
 def delete_expense(expenseID):
-
+    line = expenseID
     # 1. Читаємо всі дані
     with open("expenses.csv", 'r') as f:
-        rows = list(csv.reader(f))
+        reader = csv.DictReader(f)
+        fieldnames = reader.fieldnames
+        rows = list(reader)
 
-    # 2. Видаляємо рядок
-    if 0 <= expenseID < len(rows):
-        del rows[expenseID]
-
-    # 3. Записуємо оновлені дані назад
-    with open("expenses.csv", 'w', newline='') as f:
-        writer = csv.writer(f)
-        writer.writerows(rows)
     
-    set_id()
+
+        # 2. Видаляємо рядок
+        if 0 <= line < len(rows):
+            accepted = gui.accept_deleting(rows, line)
+            
+        if accepted:
+            del rows[line]
+
+        # 3. Записуємо оновлені дані назад
+        with open("expenses.csv", 'w', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()  # Write the top row (Date, Category, etc.)
+            writer.writerows(rows)
+        
+        set_id()
