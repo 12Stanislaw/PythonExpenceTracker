@@ -1,11 +1,17 @@
 import csv
 import gui
 
-def set_id():
+
+fieldnames = ["ID", "amount", "category", "comment"]
+
+def get_data():
     with open('expenses.csv', mode='r') as file:
-        reader = csv.DictReader(file)
-        fieldnames = reader.fieldnames
-        data = list(reader)
+            return list(csv.DictReader(file))
+            
+
+def set_id():
+
+    data = get_data()
  
     for i in range(len(data)):
         data[i]["ID"] = i+1
@@ -17,72 +23,59 @@ def set_id():
         writer.writerows(data) # Записуємо всі змінені рядки
     
     
-
 def load_data():
+    set_id() # Оновлюємо ID перед завантаженням
+    data_list = get_data() # Отримуємо актуальний список
     
-    set_id()
+    total = 0.0
+    for row in data_list:
+        if row.get("amount"):
+            total += float(row["amount"])
 
-    with open('expenses.csv', mode='r') as file:
-        reader = csv.DictReader(file)
-
-        data_list = []
-        for row in reader:
-            data_list.append(row)
-        
-        total = 0.0
-        for row in data_list:
-            for key, value in row.items():
-                if key == "amount":
-                    total += float(value)
-
-        gui.write_loaded(tuple(data_list), total)
-        
+    gui.write_loaded(tuple(data_list), total)
 
 
 
 def add_expense(amount, category, comment):
-    fieldnames = ["ID","amount", "category", "comment"]
 
+    accepted = gui.accept_adding(amount, category, comment)
 
-    last_id = 0;
-    with open('expenses.csv', mode='r', encoding='utf-8') as file:
-        reader = list(csv.DictReader(file))
-        if reader:
-            last_id = int(reader[-1]["ID"])
-    new_id = last_id + 1
+    if accepted:
+        data = get_data()
+        last_id = 0;
+        
+        if data:
+            last_id = int(data[-1]["ID"])
+        new_id = last_id + 1
 
-    with open('expenses.csv', mode='a', newline='',) as file:
-        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        with open('expenses.csv', mode='a',  encoding='utf-8', newline='') as file:
+            writer = csv.DictWriter(file, fieldnames=fieldnames)
 
-        new_row = {
-            "ID" : new_id,
-            "amount" : amount,
-            "category" : category,
-            "comment" : comment
-        }
-        writer.writerow(new_row)
-
-def delete_expense(expenseID):
-    line = expenseID
-    # 1. Читаємо всі дані
-    with open("expenses.csv", 'r') as f:
-        reader = csv.DictReader(f)
-        fieldnames = reader.fieldnames
-        rows = list(reader)
-
+            new_row = {
+                "ID" : new_id,
+                "amount" : amount,
+                "category" : category,
+                "comment" : comment
+            }
+            writer.writerow(new_row)
+    else:
+        return
     
 
-        # 2. Видаляємо рядок
-        if 0 <= line < len(rows):
-            accepted = gui.accept_deleting(rows, line)
-            
-        if accepted:
-            del rows[line]
+def delete_expense(expenseID):
+    line = expenseID -1
+    rows = get_data()
 
-        # 3. Записуємо оновлені дані назад
-        with open("expenses.csv", 'w', newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=fieldnames)
-            writer.writeheader()  # Write the top row (Date, Category, etc.)
-            writer.writerows(rows)
+    if 0 <= line < len(rows):
+        accepted = gui.accept_deleting(rows, line)
+            
+    if accepted:
+        del rows[line]
+
+    # 3. Записуємо оновлені дані назад
+    with open("expenses.csv", 'w',encoding='utf-8', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()  # Write the top row (Date, Category, etc.)
+        writer.writerows(rows)
         
-        set_id()
+    set_id()

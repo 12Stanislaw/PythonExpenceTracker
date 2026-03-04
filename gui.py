@@ -30,6 +30,8 @@ def write_loaded(data, total):
 def accept_deleting(rows, expenceID):
     row= rows[expenceID]
     
+    print("Expence to delete:")
+    print("-" * 10)
     print(f"ID       : {row['ID']}") 
     print(f"Amount   : {row['amount']}")
     print(f"Category : {row['category']}")
@@ -44,3 +46,22 @@ def accept_deleting(rows, expenceID):
     else:
         print("Wrong option")
         return False
+    
+def accept_adding(amount, category, comment):
+    
+    print("Expence to add:")
+    print("-" * 10) 
+    print(f"Amount   : {amount}")
+    print(f"Category : {category}")
+    print(f"Comment  : {comment}")
+
+    res = input("You sure [y/n]? ")
+
+    if res.lower() == 'y':
+        return True
+    elif res.lower() == 'n':
+        return False
+    else:
+        print("Wrong option")
+        return False
+    
