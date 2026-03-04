@@ -30,6 +30,21 @@ parser_delete.add_argument("expenseID",
                             help = "ID of expense", 
                             type = int)
 
+#---REDACT EXPENSE---
+parser_redact = subparsers.add_parser("redact_expense")
+parser_redact.add_argument("expenseID",
+                            help = "ID of expense", 
+                            type = int)
+parser_redact.add_argument("amount", 
+                        help = "Amount of money", 
+                        type = float)
+parser_redact.add_argument("category",
+                         help = "Category of expense",
+                         choices = allowed_categories)
+parser_redact.add_argument("comment",
+                        help = "Comment for expence")
+
+
 #Getting arguments to args
 args = parser.parse_args()
 
@@ -42,3 +57,5 @@ elif args.command == "add_expense":
 
 elif args.command == "delete_expense":
     expense_tracker.delete_expense(args.expenseID)
+elif args.command == "redact_expense":
+    expense_tracker.redact_expense(args.expenseID, args.amount, args.category, args.comment)
