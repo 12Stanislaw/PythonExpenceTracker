@@ -5,14 +5,18 @@ import gui
 fieldnames = ["ID", "amount", "category", "comment"]
 
 def get_data():
-    with open('expenses.csv', mode='r') as file:
+    try:
+        with open('expenses.csv', mode='r') as file:
             return list(csv.DictReader(file))
-            
+    except FileNotFoundError:       #If file doesn't exist create a new one
+        with open('expenses.csv', mode='w', encoding='utf-8', newline='') as file:
+            writer = csv.DictWriter(file, fieldnames=fieldnames)
+            writer.writeheader()
+        return []
 
 def set_id():
 
     data = get_data()
- 
     for i in range(len(data)):
         data[i]["ID"] = i+1
 
@@ -30,11 +34,12 @@ def load_data():
     total = 0.0
     for row in data_list:
         if row.get("amount"):
-            total += float(row["amount"])
+            try:
+                total += float(row["amount"])
+            except ValueError:      #If amount is not float at some point
+                continue
 
     gui.write_loaded(tuple(data_list), total)
-
-
 
 def add_expense(amount, category, comment):
 

@@ -31,7 +31,7 @@ def accept_deleting(rows, expenceID):
     row= rows[expenceID]
     
     print("Expence to delete:")
-    print("-" * 10)
+    print("-" * 20)
     print(f"ID       : {row['ID']}") 
     print(f"Amount   : {row['amount']}")
     print(f"Category : {row['category']}")
