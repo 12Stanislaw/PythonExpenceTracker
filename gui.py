@@ -50,7 +50,7 @@ def accept_deleting(rows, expenceID):
 def accept_adding(amount, category, comment):
     
     print("Expence to add:")
-    print("-" * 10) 
+    print("-" * 20) 
     print(f"Amount   : {amount}")
     print(f"Category : {category}")
     print(f"Comment  : {comment}")
@@ -64,4 +64,24 @@ def accept_adding(amount, category, comment):
     else:
         print("Wrong option")
         return False
+
+
+def accept_redacting(data, expenseID, amount, category, comment):
+    row= data[expenseID]
     
+    print("Your changes: ")
+    print("-" * 20)
+    
+    print(f"Amount   : {row['amount']} | {amount}")
+    print(f"Category : {row['category']} | {category}")
+    print(f"Comment  : {row['comment']} | {comment}")
+
+    res = input("Is that right [y/n]? ")
+
+    if res.lower() == 'y':
+        return True
+    elif res.lower() == 'n':
+        return False
+    else:
+        print("Wrong option")
+        return False

@@ -191,17 +191,20 @@ def redact_expense(expenseID, amount, category, comment):
     
     index = expenseID - 1
 
-    if 0 <= index < len(data):
-        data[index] = {
-            "ID": data[index]["ID"],
-            "amount": amount,
-            "category": category,
-            "comment": comment
-        }
+    accepted = gui.accept_redacting(data, expenseID, amount, category, comment)
+    
+    if accepted: 
+        if 0 <= index < len(data):
+            data[index] = {
+                "ID": data[index]["ID"],
+                "amount": amount,
+                "category": category,
+                "comment": comment
+            }
 
 
-    with open("expenses.csv", 'w',encoding='utf-8', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
-        writer.writeheader()  # Write the top row (Date, Category, etc.)
-        writer.writerows(data)
+        with open("expenses.csv", 'w',encoding='utf-8', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()  # Write the top row (Date, Category, etc.)
+            writer.writerows(data)
 
