@@ -3,7 +3,7 @@ import expense_tracker
 
 #List of allowed categories
 allowed_categories = ["grocery", "eating out", "fitness", "health", "presents"]
-
+characteristics = ["amount", "category", "comment"]
 #---CREATING MAIN PARSER---
 parser = argparse.ArgumentParser("Expence tracker")
 
@@ -35,14 +35,12 @@ parser_redact = subparsers.add_parser("redact_expense")
 parser_redact.add_argument("expenseID",
                             help = "ID of expense", 
                             type = int)
-parser_redact.add_argument("amount", 
-                        help = "Amount of money", 
-                        type = float)
-parser_redact.add_argument("category",
-                         help = "Category of expense",
-                         choices = allowed_categories)
-parser_redact.add_argument("comment",
-                        help = "Comment for expence")
+parser_redact.add_argument("cvalue",
+                           help = "What do you want to change?",
+                           choices=characteristics)
+parser_redact.add_argument("new_value",
+                           help = "Type your change",
+                           )
 
 
 #Getting arguments to args
@@ -58,4 +56,4 @@ elif args.command == "add_expense":
 elif args.command == "delete_expense":
     expense_tracker.delete_expense(args.expenseID)
 elif args.command == "redact_expense":
-    expense_tracker.redact_expense(args.expenseID, args.amount, args.category, args.comment)
+    expense_tracker.redact_expense(args.expenseID, args.cvalue, args.new_value)

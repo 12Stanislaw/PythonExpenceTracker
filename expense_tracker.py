@@ -186,22 +186,21 @@ def delete_expense(expenseID):
     set_id()
 
 
-def redact_expense(expenseID, amount, category, comment):
+def redact_expense(expenseID, cvalue, new_value):
     data = get_data()
     
     index = expenseID - 1
+    row = data[index]
 
-    accepted = gui.accept_redacting(data, expenseID, amount, category, comment)
+    accepted = gui.accept_redacting(row, cvalue, new_value)
     
     if accepted: 
         if 0 <= index < len(data):
-            data[index] = {
-                "ID": data[index]["ID"],
-                "amount": amount,
-                "category": category,
-                "comment": comment
-            }
-
+            if cvalue == "amount":
+                row[cvalue] = float(new_value)
+            else:
+                row[cvalue] = new_value
+            data[index] = row
 
         with open("expenses.csv", 'w',encoding='utf-8', newline='') as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames)

@@ -66,18 +66,14 @@ def accept_adding(amount, category, comment):
         return False
 
 
-def accept_redacting(data, expenseID, amount, category, comment):
-    row= data[expenseID]
+def accept_redacting(row, cvalue, new_value):
     
-    print("Your changes: ")
+    print("Your change: ")
     print("-" * 20)
     
-    print(f"Amount   : {row['amount']} | {amount}")
-    print(f"Category : {row['category']} | {category}")
-    print(f"Comment  : {row['comment']} | {comment}")
-
+    print(f"{cvalue}   : {row[cvalue]} | {new_value}")
+    
     res = input("Is that right [y/n]? ")
-
     if res.lower() == 'y':
         return True
     elif res.lower() == 'n':
