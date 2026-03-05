@@ -1,6 +1,7 @@
 import datetime
 import argparse
 import expense_tracker
+import utils
 
 #List of allowed categories
 allowed_categories = ["grocery", "eating out", "fitness", "health", "presents"]
@@ -54,15 +55,21 @@ if args.command == "load_data":
     expense_tracker.load_data()
 
 elif args.command == "add_expense":
+    # 1. Валідація суми
     if args.amount < 0:
         print("Error: Amount cannot be negative.")
     else:
+        # 2. Валідація дати
+        final_date = None
         if args.date:
-            expense_date = args.date
+            if utils.is_valid_date(args.date):
+                final_date = args.date
         else:
-            expense_date = datetime.date.today().strftime("%Y-%m-%d")
-        
-        expense_tracker.add_expense(args.amount, args.category, args.comment, expense_date)
+            final_date = datetime.date.today().strftime("%Y-%m-%d")
+
+        # 3. Виклик функції, якщо все пройшло перевірку
+        if final_date:
+            expense_tracker.add_expense(args.amount, args.category, args.comment, final_date)
 
 elif args.command == "delete_expense":
     expense_tracker.delete_expense(args.expenseID)
@@ -71,23 +78,27 @@ elif args.command == "redact_expense":
     valid = True
     final_value = args.new_value
 
-    # 1. Якщо змінюємо amount — перевіряємо, чи це додатнє число
+    # Валідація суми
     if args.cvalue == "amount":
         try:
             final_value = float(args.new_value)
-            if final_value < 0:  
+            if final_value < 0:
                 print("Error: New amount cannot be negative.")
                 valid = False
         except ValueError:
-            print("Error: 'amount' must be a number.")
+            print("Error: 'amount' must be a valid number.")
             valid = False
 
-    # 2. Якщо змінюємо category — перевіряємо, чи вона є в списку дозволених
+    # Валідація категорії
     elif args.cvalue == "category":
         if args.new_value not in allowed_categories:
             print(f"Error: Invalid category. Choose from: {', '.join(allowed_categories)}")
             valid = False
+            
+    # Валідація дати (якщо захочете редагувати дату)
+    elif args.cvalue == "date":
+        if not utils.is_valid_date(args.new_value):
+            valid = False
 
-    # Якщо все ок — викликаємо функцію
     if valid:
         expense_tracker.redact_expense(args.expenseID, args.cvalue, final_value)

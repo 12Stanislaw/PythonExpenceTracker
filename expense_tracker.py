@@ -2,6 +2,7 @@ import csv
 import gui
 
 
+
 fieldnames = ["ID", "amount", "category", "comment", "date"]
 
 def get_data():
@@ -50,7 +51,7 @@ def add_expense(amount, category, comment, date):
     }
 
     # Викликаємо акцептацію перед записом
-    if gui.accept_adding(amount, category, comment):
+    if gui.accept_adding(amount, category, comment, date):
         try:
             with open("expenses.csv", "a", encoding="utf-8", newline="") as f:
                 writer = csv.DictWriter(f, fieldnames=fieldnames)

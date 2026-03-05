@@ -47,13 +47,14 @@ def accept_deleting(rows, expenceID):
         print("Wrong option")
         return False
     
-def accept_adding(amount, category, comment):
+def accept_adding(amount, category, comment, date):
     
     print("Expence to add:")
     print("-" * 20) 
     print(f"Amount   : {amount}")
     print(f"Category : {category}")
     print(f"Comment  : {comment}")
+    print(f"Date     : {date}")
 
     res = input("You sure [y/n]? ")
 
