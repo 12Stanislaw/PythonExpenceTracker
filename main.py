@@ -1,9 +1,10 @@
+import datetime
 import argparse
 import expense_tracker
 
 #List of allowed categories
 allowed_categories = ["grocery", "eating out", "fitness", "health", "presents"]
-characteristics = ["amount", "category", "comment"]
+characteristics = ["amount", "category", "comment", "date"]
 #---CREATING MAIN PARSER---
 parser = argparse.ArgumentParser("Expence tracker")
 
@@ -23,6 +24,8 @@ parser_add.add_argument("category",
                          choices = allowed_categories)
 parser_add.add_argument("comment",
                         help = "Comment for expence")
+parser_add.add_argument("--date",
+                         help="Date in YYYY-MM-DD format (default: today)")
 
 #---DELETE EXPENSE---
 parser_delete = subparsers.add_parser("delete_expense")
@@ -51,11 +54,15 @@ if args.command == "load_data":
     expense_tracker.load_data()
 
 elif args.command == "add_expense":
-
     if args.amount < 0:
         print("Error: Amount cannot be negative.")
     else:
-        expense_tracker.add_expense(args.amount, args.category, args.comment)
+        if args.date:
+            expense_date = args.date
+        else:
+            expense_date = datetime.date.today().strftime("%Y-%m-%d")
+        
+        expense_tracker.add_expense(args.amount, args.category, args.comment, expense_date)
 
 elif args.command == "delete_expense":
     expense_tracker.delete_expense(args.expenseID)
