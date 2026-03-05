@@ -51,9 +51,36 @@ if args.command == "load_data":
     expense_tracker.load_data()
 
 elif args.command == "add_expense":
-    expense_tracker.add_expense(args.amount, args.category, args.comment)
+
+    if args.amount < 0:
+        print("Error: Amount cannot be negative.")
+    else:
+        expense_tracker.add_expense(args.amount, args.category, args.comment)
 
 elif args.command == "delete_expense":
     expense_tracker.delete_expense(args.expenseID)
+
 elif args.command == "redact_expense":
-    expense_tracker.redact_expense(args.expenseID, args.cvalue, args.new_value)
+    valid = True
+    final_value = args.new_value
+
+    # 1. Якщо змінюємо amount — перевіряємо, чи це додатнє число
+    if args.cvalue == "amount":
+        try:
+            final_value = float(args.new_value)
+            if final_value < 0:  
+                print("Error: New amount cannot be negative.")
+                valid = False
+        except ValueError:
+            print("Error: 'amount' must be a number.")
+            valid = False
+
+    # 2. Якщо змінюємо category — перевіряємо, чи вона є в списку дозволених
+    elif args.cvalue == "category":
+        if args.new_value not in allowed_categories:
+            print(f"Error: Invalid category. Choose from: {', '.join(allowed_categories)}")
+            valid = False
+
+    # Якщо все ок — викликаємо функцію
+    if valid:
+        expense_tracker.redact_expense(args.expenseID, args.cvalue, final_value)
