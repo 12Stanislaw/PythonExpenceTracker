@@ -4,28 +4,34 @@ def write_loaded(data, total):
         print("Empty list")
         return
 
+    # 1. Визначаємо заголовки та ширину колонок (наприклад, 15 символів на кожну)
+    # Порада: можна зробити ширину динамічною, але 15-20 зазвичай достатньо
+    col_width = 18
     headers = list(data[0].keys())
     
-    # Виводимо шапку
-    header_line = " | ".join(headers)
-    print(header_line)
+    # Створюємо рядок форматування, наприклад: "{:<18} | {:<18} | ..."
+    format_row = " | ".join(["{:<" + str(col_width) + "}"] * len(headers))
+
+    # 2. Виводимо шапку
+    header_line = format_row.format(*[h.upper() for h in headers])
+    print("\n" + header_line)
     print("-" * len(header_line))
 
-    # 2. Виводимо рядки з форматуванням ціни
+    # 3. Виводимо дані
     for row in data:
-        formatted_row = []
-        for key, value in row.items():
-            # Якщо це колонка з ціною — додаємо знак $
+        formatted_values = []
+        for key in headers:
+            value = row[key]
             if key == "amount":
-                formatted_row.append(f"{value}$")
+                formatted_values.append(f"{value}$")
             else:
-                formatted_row.append(str(value))
-
-        print(" | ".join(formatted_row))
+                formatted_values.append(str(value))
+        
+        print(format_row.format(*formatted_values))
     
+    # 4. Підсумок
     print("-" * len(header_line))
-    print(f"Total expenses: {total}$")
-
+    print(f"TOTAL EXPENSES: {total}$".rjust(len(header_line)))
 
 def accept_deleting(rows, expenceID):
     row= rows[expenceID]

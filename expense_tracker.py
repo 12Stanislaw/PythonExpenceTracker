@@ -27,20 +27,37 @@ def set_id():
         writer.writeheader()   # Записуємо заголовки (ID, Amount, Category тощо)
         writer.writerows(data) # Записуємо всі змінені рядки
     
-    
-def load_data():
-    set_id() # Оновлюємо ID перед завантаженням
-    data_list = get_data() # Отримуємо актуальний список
-    
-    total = 0.0
-    for row in data_list:
-        if row.get("amount"):
-            try:
-                total += float(row["amount"])
-            except ValueError:      #If amount is not float at some point
-                continue
+def update_file_with_sorted_ids(sorted_data):
+    # Оновлюємо ID прямо в посортованому списку
+    for i, row in enumerate(sorted_data, start=1):
+        row["ID"] = i
 
-    gui.write_loaded(tuple(data_list), total)
+    # Записуємо цей посортований і пронумерований список у файл
+    with open("expenses.csv", 'w', encoding='utf-8', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(sorted_data)
+
+def load_data():
+    # 1. Отримуємо дані
+    data_list = get_data() 
+    if not data_list:
+        gui.write_loaded([], 0)
+        return
+
+    # 2. Сортуємо список (від нових до старих)
+    # Тепер весь список у пам'яті вже в правильному порядку
+    sorted_data = sorted(data_list, key=lambda x: x['date'], reverse=True)
+
+    # 3. Перезаписуємо файл із НОВИМИ ID на основі сортування
+    # Ми передаємо вже посортований список у функцію запису
+    update_file_with_sorted_ids(sorted_data)
+
+    # 4. Рахуємо суму
+    total = sum(float(row["amount"]) for row in sorted_data if row.get("amount"))
+
+    # 5. Виводимо актуальні (вже пронумеровані) дані
+    gui.write_loaded(tuple(sorted_data), total)
 
 def add_expense(amount, category, comment, date):
     new_expense = {
