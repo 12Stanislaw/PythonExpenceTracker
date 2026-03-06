@@ -1,104 +1,52 @@
-import datetime
 import argparse
+import datetime
 import expense_tracker
 import utils
 
-#List of allowed categories
-allowed_categories = ["grocery", "eating out", "fitness", "health", "presents"]
-characteristics = ["amount", "category", "comment", "date"]
-#---CREATING MAIN PARSER---
-parser = argparse.ArgumentParser("Expence tracker")
+def main():
+    parser = argparse.ArgumentParser(description="Expense Tracker Pro")
+    subparsers = parser.add_subparsers(dest="command", required=True)
 
-#---CREATING SUB PARSERS---
-subparsers = parser.add_subparsers(dest="command", help= "Commads")
+    # Load
+    subparsers.add_parser("list")
 
-#---LOAD_DATA---
-subparsers.add_parser("load_data", help = "Show all expenses")
+    # Add
+    add_p = subparsers.add_parser("add")
+    add_p.add_argument("amount", type=float)
+    add_p.add_argument("category", choices=utils.ALLOWED_CATEGORIES)
+    add_p.add_argument("comment")
+    add_p.add_argument("--date", default=datetime.date.today().strftime("%Y-%m-%d"))
 
-#---ADD EXPENSE---
-parser_add = subparsers.add_parser("add_expense")
-parser_add.add_argument("amount", 
-                        help = "Amount of money", 
-                        type = float)
-parser_add.add_argument("category",
-                         help = "Category of expense",
-                         choices = allowed_categories)
-parser_add.add_argument("comment",
-                        help = "Comment for expence")
-parser_add.add_argument("--date",
-                         help="Date in YYYY-MM-DD format (default: today)")
+    # Delete
+    del_p = subparsers.add_parser("delete")
+    del_p.add_argument("id", type=int)
 
-#---DELETE EXPENSE---
-parser_delete = subparsers.add_parser("delete_expense")
-parser_delete.add_argument("expenseID",
-                            help = "ID of expense", 
-                            type = int)
+    # Edit
+    edit_p = subparsers.add_parser("edit")
+    edit_p.add_argument("id", type=int)
+    edit_p.add_argument("field", choices=["amount", "category", "comment", "date"])
+    edit_p.add_argument("value")
 
-#---REDACT EXPENSE---
-parser_redact = subparsers.add_parser("redact_expense")
-parser_redact.add_argument("expenseID",
-                            help = "ID of expense", 
-                            type = int)
-parser_redact.add_argument("cvalue",
-                           help = "What do you want to change?",
-                           choices=characteristics)
-parser_redact.add_argument("new_value",
-                           help = "Type your change",
-                           )
+    args = parser.parse_args()
 
-
-#Getting arguments to args
-args = parser.parse_args()
-
-#Calling functions from expese_tracker.py 
-if args.command == "load_data":
-    expense_tracker.load_data()
-
-elif args.command == "add_expense":
-    # 1. Валідація суми
-    if args.amount < 0:
-        print("Error: Amount cannot be negative.")
-    else:
-        # 2. Валідація дати
-        final_date = None
-        if args.date:
+    try:
+        if args.command == "list":
+            expense_tracker.load_data()
+        
+        elif args.command == "add":
+            if args.amount <= 0: raise ValueError("Amount must be positive")
             if utils.is_valid_date(args.date):
-                final_date = args.date
-        else:
-            final_date = datetime.date.today().strftime("%Y-%m-%d")
+                expense_tracker.add_expense(args.amount, args.category, args.comment, args.date)
 
-        # 3. Виклик функції, якщо все пройшло перевірку
-        if final_date:
-            expense_tracker.add_expense(args.amount, args.category, args.comment, final_date)
+        elif args.command == "delete":
+            expense_tracker.delete_expense(args.id)
 
-elif args.command == "delete_expense":
-    expense_tracker.delete_expense(args.expenseID)
-
-elif args.command == "redact_expense":
-    valid = True
-    final_value = args.new_value
-
-    # Валідація суми
-    if args.cvalue == "amount":
-        try:
-            final_value = float(args.new_value)
-            if final_value < 0:
-                print("Error: New amount cannot be negative.")
-                valid = False
-        except ValueError:
-            print("Error: 'amount' must be a valid number.")
-            valid = False
-
-    # Валідація категорії
-    elif args.cvalue == "category":
-        if args.new_value not in allowed_categories:
-            print(f"Error: Invalid category. Choose from: {', '.join(allowed_categories)}")
-            valid = False
+        elif args.command == "edit":
+            # Тут можна додати специфічну валідацію для value залежно від field
+            expense_tracker.redact_expense(args.id, args.field, args.value)
             
-    # Валідація дати (якщо захочете редагувати дату)
-    elif args.cvalue == "date":
-        if not utils.is_valid_date(args.new_value):
-            valid = False
+    except Exception as e:
+        print(f"Runtime Error: {e}")
 
-    if valid:
-        expense_tracker.redact_expense(args.expenseID, args.cvalue, final_value)
+if __name__ == "__main__":
+    main()

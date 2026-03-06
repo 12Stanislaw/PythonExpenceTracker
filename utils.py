@@ -1,5 +1,9 @@
 import datetime
 
+ALLOWED_CATEGORIES = ["grocery", "eating out", "fitness", "health", "presents"]
+FIELDS = ["ID", "amount", "category", "comment", "date"]
+DB_FILE = "expenses.csv"
+
 def is_valid_date(date_str):
     """Перевіряє формат дати (YYYY-MM-DD) та чи не з майбутнього вона."""
     try:

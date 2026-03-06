@@ -1,31 +1,20 @@
 import csv
 import gui
+from utils import FIELDS, DB_FILE
 
 
-
-fieldnames = ["ID", "amount", "category", "comment", "date"]
-
-def get_data():
-    try:
-        with open('expenses.csv', mode='r') as file:
-            return list(csv.DictReader(file))
-    except FileNotFoundError:       #If file doesn't exist create a new one
-        with open('expenses.csv', mode='w', encoding='utf-8', newline='') as file:
-            writer = csv.DictWriter(file, fieldnames=fieldnames)
-            writer.writeheader()
+def _read_all() -> list:
+    if not DB_FILE:
         return []
+    with open(DB_FILE, mode='r', encoding='utf-8') as f:
+        return list(csv.DictReader(f))
 
-def set_id():
+def _write_all(data: list):
+    with open(DB_FILE, mode='w', encoding='utf-8', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=FIELDS)
+        writer.writeheader()
+        writer.writerows(data)
 
-    data = get_data()
-    for i in range(len(data)):
-        data[i]["ID"] = i+1
-
-    with open("expenses.csv", 'w', encoding='utf-8', newline='') as f:
-        # Використовуємо DictWriter, щоб він розумів структуру словників
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
-        writer.writeheader()   # Записуємо заголовки (ID, Amount, Category тощо)
-        writer.writerows(data) # Записуємо всі змінені рядки
     
 def update_file_with_sorted_ids(sorted_data):
     # Оновлюємо ID прямо в посортованому списку
@@ -34,93 +23,51 @@ def update_file_with_sorted_ids(sorted_data):
 
     # Записуємо цей посортований і пронумерований список у файл
     with open("expenses.csv", 'w', encoding='utf-8', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer = csv.DictWriter(f, fieldnames=FIELDS)
         writer.writeheader()
         writer.writerows(sorted_data)
 
 def load_data():
-    # 1. Отримуємо дані
-    data_list = get_data() 
-    if not data_list:
-        gui.write_loaded([], 0)
-        return
-
-    # 2. Сортуємо список (від нових до старих)
-    # Тепер весь список у пам'яті вже в правильному порядку
-    sorted_data = sorted(data_list, key=lambda x: x['date'], reverse=True)
-
-    # 3. Перезаписуємо файл із НОВИМИ ID на основі сортування
-    # Ми передаємо вже посортований список у функцію запису
-    update_file_with_sorted_ids(sorted_data)
-
-    # 4. Рахуємо суму
-    total = sum(float(row["amount"]) for row in sorted_data if row.get("amount"))
-
-    # 5. Виводимо актуальні (вже пронумеровані) дані
-    gui.write_loaded(tuple(sorted_data), total)
+    data = sorted(_read_all(), key=lambda x: x['date'], reverse=True)
+    total = sum(float(row["amount"]) for row in data)
+    gui.display_expenses(data, total)
 
 def add_expense(amount, category, comment, date):
-    new_expense = {
-        "amount": amount,
-        "category": category,
-        "comment": comment,
-        "date": date
+    if not gui.confirm_action("add", {"amount": amount, "category": category, "comment": comment, "date": date}):
+        return
+
+    data = _read_all()
+    new_id = max([int(i['ID']) for i in data], default=0) + 1
+    
+    new_entry = {
+        "ID": new_id, "amount": amount, "category": category, 
+        "comment": comment, "date": date
     }
-
-    # Викликаємо акцептацію перед записом
-    if gui.accept_adding(amount, category, comment, date):
-        try:
-            with open("expenses.csv", "a", encoding="utf-8", newline="") as f:
-                writer = csv.DictWriter(f, fieldnames=fieldnames)
-                
-                if f.tell() == 0:
-                    writer.writeheader()
-                    
-                writer.writerow(new_expense)
-                
-            print(f"Successfully added!")
-        except Exception as e:
-            print(f"An error occurred while saving: {e}")
-    else:
-        print("Addition cancelled by user.")
-
-def delete_expense(expenseID):
-    line = expenseID -1
-    rows = get_data()
-
-    if 0 <= line < len(rows):
-        accepted = gui.accept_deleting(rows, line)
-            
-    if accepted:
-        del rows[line]
-
-    # 3. Записуємо оновлені дані назад
-    with open("expenses.csv", 'w',encoding='utf-8', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
-        writer.writeheader()  # Write the top row (Date, Category, etc.)
-        writer.writerows(rows)
-        
-    set_id()
-
-
-def redact_expense(expenseID, cvalue, new_value):
-    data = get_data()
     
-    index = expenseID - 1
-    row = data[index]
+    # Дописуємо в кінець (Append) - це безпечніше, ніж переписувати все
+    with open(DB_FILE, mode='a', encoding='utf-8', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=FIELDS)
+        if f.tell() == 0: writer.writeheader()
+        writer.writerow(new_entry)
+    print("Successfully added!")
 
-    accepted = gui.accept_redacting(row, cvalue, new_value)
+def delete_expense(expense_id):
+    data = _read_all()
+    # Шукаємо запис по реальному ID, а не по індексу в списку
+    entry = next((item for item in data if int(item['ID']) == expense_id), None)
     
-    if accepted: 
-        if 0 <= index < len(data):
-            if cvalue == "amount":
-                row[cvalue] = float(new_value)
-            else:
-                row[cvalue] = new_value
-            data[index] = row
+    if entry and gui.confirm_action("delete", entry):
+        new_data = [item for item in data if int(item['ID']) != expense_id]
+        _write_all(new_data)
+        print("Deleted.")
 
-        with open("expenses.csv", 'w',encoding='utf-8', newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=fieldnames)
-            writer.writeheader()  # Write the top row (Date, Category, etc.)
-            writer.writerows(data)
-
+def redact_expense(expense_id, field, new_value):
+    data = _read_all()
+    for row in data:
+        if int(row['ID']) == expense_id:
+            if gui.confirm_action("edit", {field: new_value}):
+                row[field] = new_value
+                _write_all(data)
+                print("Updated.")
+            return
+    print("Expense not found.")
