@@ -8,7 +8,8 @@ def main():
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     # Load
-    subparsers.add_parser("list")
+    list_p = subparsers.add_parser("list")
+    list_p.add_argument("--category", choices=utils.ALLOWED_CATEGORIES, default = None)
 
     # Add
     add_p = subparsers.add_parser("add")
@@ -31,7 +32,7 @@ def main():
 
     try:
         if args.command == "list":
-            expense_tracker.load_data()
+            expense_tracker.load_data(args.category)
         
         elif args.command == "add":
             if args.amount <= 0: raise ValueError("Amount must be positive")

@@ -27,10 +27,15 @@ def update_file_with_sorted_ids(sorted_data):
         writer.writeheader()
         writer.writerows(sorted_data)
 
-def load_data():
+def load_data(category = None):
     data = sorted(_read_all(), key=lambda x: x['date'], reverse=True)
+
+    if category:
+        data = [row for row in data if row['category'] == category]
+
     total = sum(float(row["amount"]) for row in data)
     gui.display_expenses(data, total)
+
 
 def add_expense(amount, category, comment, date):
     if not gui.confirm_action("add", {"amount": amount, "category": category, "comment": comment, "date": date}):
